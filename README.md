@@ -1,8 +1,6 @@
 # movies-explorer-api
-
+API приложения Movies Explorer.
 
 # Ссылки:  
-Публичный IP - [130.193.40.61]
-
-[https://vservice.students.nomoreparties.xyz] - зарезервированный адрес сайта для front-end
-[https://api.vservice.students.nomoreparties.xyz] - адрес back-end сайта
++ Публичный IP - [130.193.40.61]
++ Адрес back-end приложения [api.vservice.students.nomoreparties.xyz](https://api.vservice.students.nomoreparties.xyz) 
