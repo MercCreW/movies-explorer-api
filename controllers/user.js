@@ -5,7 +5,7 @@ const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 const AuthError = require('../errors/AuthError');
-const jwtSecretDevKey = require('../utils/config');
+const { jwtSecretDevKey } = require('../utils/config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 

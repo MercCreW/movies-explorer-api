@@ -9,7 +9,7 @@ const errorsHandler = require('./middlewares/errorsHandler');
 const routes = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./middlewares/limiter');
-const mongoDevUrl = require('./utils/config');
+const { mongoDevUrl } = require('./utils/config');
 
 const { NODE_ENV, MONGO_URL } = process.env;
 
