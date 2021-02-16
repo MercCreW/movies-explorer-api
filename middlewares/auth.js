@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const AuthError = require('../errors/AuthError');
+const jwtSecretDevKey = require('../utils/config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -14,7 +15,7 @@ module.exports = (req, res, next) => {
 
   let payload;
   try {
-    payload = jwt.verify(token, `${NODE_ENV === 'production' ? JWT_SECRET : 'merc-2AI-secret'}`);
+    payload = jwt.verify(token, `${NODE_ENV === 'production' ? JWT_SECRET : jwtSecretDevKey}`);
   } catch (err) {
     throw new AuthError('Нужна авторизация');
   }

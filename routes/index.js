@@ -13,8 +13,8 @@ routes.post('/signup', validateUser, createUser);
 routes.use('/movies', auth, routersMovie);
 routes.use('/users', auth, routersUsers);
 routes.use('/*', (req, res, next) => {
-    const error = new NotFoundError('Запрашиваемый ресурс не найден');
-    next(error);
+  const error = new NotFoundError('Запрашиваемый ресурс не найден');
+  next(error);
 });
 
 module.exports = routes;

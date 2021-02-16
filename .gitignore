@@ -15,7 +15,7 @@ node_modules
 .vscode
 
 # key
-.env
+**/*.env
 
 # Logger
 *.log

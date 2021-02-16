@@ -5,6 +5,7 @@ const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 const AuthError = require('../errors/AuthError');
+const jwtSecretDevKey = require('../utils/config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -43,10 +44,21 @@ const checkToken = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  User.findOne({ email }).select('+password')
     .then((user) => {
-      console.log(user);
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'merc-2AI-secret', { expiresIn: '7d' });
+      if (!user) {
+        throw new AuthError('Неправильные почта или пароль');
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthError('Неправильные почта или пароль');
+          }
+          return user;
+        });
+    })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : jwtSecretDevKey, { expiresIn: '7d' });
       res.send({ token });
     })
     .catch(next);
