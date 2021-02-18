@@ -1,9 +1,10 @@
 const { celebrate, Joi, CelebrateError } = require('celebrate');
 const validator = require('validator');
+const { wrongURLError } = require('../utils/constants');
 
 const validateUrl = (value) => {
   if (!validator.isURL(value)) {
-    throw new CelebrateError('Некорректный URL');
+    throw new CelebrateError(wrongURLError);
   }
   return value;
 };
@@ -25,7 +26,7 @@ const validateUser = celebrate({
 
 const validateId = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
+    movieId: Joi.string().alphanum().length(24).hex(),
   }),
 });
 
@@ -39,6 +40,7 @@ const validateMovie = celebrate({
     image: Joi.string().custom(validateUrl).required(),
     trailer: Joi.string().custom(validateUrl).required(),
     thumbnail: Joi.string().custom(validateUrl).required(),
+    movieId: Joi.string().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),

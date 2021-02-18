@@ -6,6 +6,10 @@ const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 const AuthError = require('../errors/AuthError');
 const { jwtSecretDevKey } = require('../utils/config');
+const {
+  emailExistError, incorrectUserIdError, validationDataIsFailError,
+  userCouldntFindError, userDataError, duplicateEmailError,
+} = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -18,25 +22,28 @@ const createUser = (req, res, next) => {
       name, email, password: hash,
     }))
     .then((user) => {
-      res.status(200).send({ message: `Пользователь ${user} создан` });
+      res.status(200).send({ email: user.email, name: user.name });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Введены некорректные данные');
+        throw new ValidationError(validationDataIsFailError);
       }
       if (err.code === 11000 && err.name === 'MongoError') {
-        throw new ConflictError('Данный email уже зарегистрирован');
+        throw new ConflictError(emailExistError);
       }
       throw err;
     })
     .catch(next);
 };
 
-const checkToken = (req, res, next) => {
+const getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new AuthError('Вы не авторизированы'))
+    .orFail(new ValidationError(incorrectUserIdError))
     .then((user) => {
-      res.send(user);
+      if (!user) {
+        throw new NotFoundError(userCouldntFindError);
+      }
+      res.send({ email: user.email, name: user.name });
     })
     .catch(next);
 };
@@ -47,12 +54,12 @@ const login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new AuthError('Неправильные почта или пароль');
+        throw new AuthError(userDataError);
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new AuthError('Неправильные почта или пароль');
+            throw new AuthError(userDataError);
           }
           return user;
         });
@@ -73,12 +80,12 @@ const updateProfile = (req, res, next) => {
       new: true,
       runValidators: true,
     })
-    .orFail(() => new NotFoundError({ message: 'Нет пользователя с таким id' }))
+    .orFail(() => new NotFoundError(incorrectUserIdError))
     .catch((err) => {
       if (err instanceof NotFoundError) {
         throw err;
       }
-      throw new ValidationError({ message: `Указаны некорректные данные: ${err.message}` });
+      throw new ConflictError(duplicateEmailError);
     })
     .then((user) => {
       res.status(200).send((user));
@@ -90,5 +97,5 @@ module.exports = {
   createUser,
   login,
   updateProfile,
-  checkToken,
+  getUser,
 };

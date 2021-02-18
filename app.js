@@ -10,15 +10,12 @@ const routes = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./middlewares/limiter');
 const { mongoDevUrl } = require('./utils/config');
+const { serverError } = require('./utils/constants');
 
 const { NODE_ENV, MONGO_URL } = process.env;
 
 const PORT = 3000;
 const app = express();
-
-app.use(cors());
-app.use(helmet());
-app.use(limiter);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -31,10 +28,12 @@ mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : mongoDevUrl, {
 });
 
 app.use(requestLogger);
-
+app.use(cors());
+app.use(helmet());
+app.use(limiter);
 app.get('/crash-test', () => {
   setTimeout(() => {
-    throw new Error('Неполадки на сервере');
+    throw new Error(serverError);
   }, 0);
 });
 

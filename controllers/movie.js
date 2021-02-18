@@ -2,19 +2,20 @@ const Movie = require('../models/movies');
 const ValidationError = require('../errors/ValidationError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
+const ConflictError = require('../errors/ConflictError');
+
+const {
+  movieIdExistError, validationDataIsFailError, noAccessError, movieNotFoundError,
+} = require('../utils/constants');
 
 const getAllSavedMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
-    .populate('owner')
     .then((movies) => res.send(movies))
     .catch(next);
 };
 
 const createMovie = (req, res, next) => {
   const {
-    country, director, duration, year, description, image, trailer, nameRU, nameEN, thumbnail,
-  } = req.body;
-  Movie.create({
     country,
     director,
     duration,
@@ -22,34 +23,55 @@ const createMovie = (req, res, next) => {
     description,
     image,
     trailer,
+    movieId,
     nameRU,
     nameEN,
     thumbnail,
-    owner: req.user._id,
-  })
-    .then((movie) => {
-      res.status(200).send(movie);
-    })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        throw new ValidationError('Validation data FAIL!');
+  } = req.body;
+  Movie.findOne({ movieId })
+    .then((id) => {
+      if (id) {
+        throw new ConflictError(movieIdExistError);
       }
-      next(error);
-    });
+      Movie.create({
+        country,
+        director,
+        duration,
+        year,
+        description,
+        image,
+        trailer,
+        movieId,
+        nameRU,
+        nameEN,
+        thumbnail,
+        owner: req.user._id,
+      })
+        .then((movie) => {
+          res.status(200).send(movie);
+        })
+        .catch((error) => {
+          if (error.name === 'ValidationError') {
+            throw new ValidationError(validationDataIsFailError);
+          }
+          next(error);
+        });
+    })
+    .catch(next);
 };
 
 const deleteSavedMovie = (req, res, next) => {
-  Movie.findById(req.params._id)
-    .orFail(new NotFoundError('Фильм не найден'))
+  Movie.findById(req.params.movieId)
+    .orFail(new NotFoundError(movieNotFoundError))
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('У вас недостаточно прав');
+        throw new ForbiddenError(noAccessError);
       }
-      Movie.findByIdAndRemove(req.params._id)
+      Movie.findByIdAndRemove(req.params.movieId)
         .then((newMovieData) => {
           res.send({ data: newMovieData });
         })
-        .catch((err) => res.status(500).json({ message: err.message }));
+        .catch(next);
     })
     .catch(next);
 };

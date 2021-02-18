@@ -1,5 +1,6 @@
 const routes = require('express').Router();
 const NotFoundError = require('../errors/NotFoundError');
+const { resourceNotFoundError } = require('../utils/constants');
 
 const routersMovie = require('./movies.js');
 const routersUsers = require('./users.js');
@@ -13,7 +14,7 @@ routes.post('/signup', validateUser, createUser);
 routes.use('/movies', auth, routersMovie);
 routes.use('/users', auth, routersUsers);
 routes.use('/*', (req, res, next) => {
-  const error = new NotFoundError('Запрашиваемый ресурс не найден');
+  const error = new NotFoundError(resourceNotFoundError);
   next(error);
 });
 
