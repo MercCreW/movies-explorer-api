@@ -61,13 +61,13 @@ const createMovie = (req, res, next) => {
 };
 
 const deleteSavedMovie = (req, res, next) => {
-  Movie.findById(req.params.movieId)
+  Movie.findById(req.params._id)
     .orFail(new NotFoundError(movieNotFoundError))
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id) {
         throw new ForbiddenError(noAccessError);
       }
-      Movie.findByIdAndRemove(req.params.movieId)
+      Movie.findByIdAndRemove(req.params._id)
         .then((newMovieData) => {
           res.send({ data: newMovieData });
         })
