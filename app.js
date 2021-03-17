@@ -14,7 +14,7 @@ const { serverError } = require('./utils/constants');
 
 const { NODE_ENV, MONGO_URL } = process.env;
 
-const PORT = 3001;
+const PORT = 3000;
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
