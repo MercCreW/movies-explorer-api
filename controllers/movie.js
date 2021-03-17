@@ -28,6 +28,7 @@ const createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
   } = req.body;
+  console.log(movieId);
   Movie.findOne({ movieId })
     .then((id) => {
       if (id) {
@@ -75,6 +76,7 @@ const deleteSavedMovie = (req, res, next) => {
     })
     .catch(next);
 };
+
 
 module.exports = {
   getAllSavedMovies,
